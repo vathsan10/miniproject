@@ -2,6 +2,7 @@ import { prisma } from "../lib/prisma.js";
 import { HttpError } from "../lib/httpError.js";
 import { generateBackupCode } from "../lib/backupCode.js";
 import { getBalance } from "./wallet.service.js";
+import { ORDER_STATUS_TRANSITIONS } from "../lib/constants.js";
 
 // Places an order as a single atomic transaction:
 //   (a) check the student's ledger balance >= total,
@@ -82,7 +83,11 @@ export async function placeOrder({ studentId, vendorId, items, pickupTime }) {
         backupCode: generateBackupCode(),
         items: { create: orderItemsData },
       },
-      include: { items: { include: { menuItem: true } }, vendor: { select: { shopName: true } } },
+      include: {
+        items: { include: { menuItem: true } },
+        vendor: { select: { shopName: true } },
+        student: { select: { name: true, rollNo: true } },
+      },
     });
 
     await tx.transaction.create({
@@ -104,7 +109,11 @@ export async function restoreStockAndRefund(tx, order, newStatus) {
     });
   }
 
-  const updated = await tx.order.update({ where: { id: order.id }, data: { status: newStatus } });
+  const updated = await tx.order.update({
+    where: { id: order.id },
+    data: { status: newStatus },
+    include: { vendor: { select: { shopName: true } } },
+  });
 
   await tx.transaction.create({
     data: { userId: order.studentId, type: "REFUND", amount: order.total, reference: order.id },
@@ -125,5 +134,34 @@ export async function cancelOrder({ orderId, studentId }) {
       throw new HttpError(400, "Only orders that haven't been accepted yet can be cancelled");
     }
     return restoreStockAndRefund(tx, order, "CANCELLED");
+  });
+}
+
+// Vendor-driven status changes (accept/reject/preparing/ready).
+// COLLECTED is deliberately unreachable here - it's only ever set by the
+// QR/backup-code pickup verification endpoint (Phase 7). Any jump not
+// listed in ORDER_STATUS_TRANSITIONS for the order's current status is
+// rejected, e.g. PLACED -> PREPARING or PLACED -> COLLECTED.
+export async function updateOrderStatus({ orderId, vendorId, newStatus }) {
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.order.findUnique({ where: { id: orderId }, include: { items: true } });
+    if (!order || order.vendorId !== vendorId) {
+      throw new HttpError(404, "Order not found");
+    }
+
+    const allowedNext = ORDER_STATUS_TRANSITIONS[order.status] || [];
+    if (!allowedNext.includes(newStatus)) {
+      throw new HttpError(400, `Cannot move an order from ${order.status} to ${newStatus}`);
+    }
+
+    if (newStatus === "REJECTED") {
+      return restoreStockAndRefund(tx, order, "REJECTED");
+    }
+
+    return tx.order.update({
+      where: { id: orderId },
+      data: { status: newStatus },
+      include: { vendor: { select: { shopName: true } } },
+    });
   });
 }

@@ -18,6 +18,9 @@ export default function VendorLayout() {
         </div>
         <nav className="flex gap-4 mt-2">
           <NavLink to="/vendor" end className={navLinkClass}>
+            Orders
+          </NavLink>
+          <NavLink to="/vendor/menu" className={navLinkClass}>
             Menu
           </NavLink>
         </nav>

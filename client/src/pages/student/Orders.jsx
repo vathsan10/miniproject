@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { formatCredits, formatDateTime } from "../../lib/format";
+import { useSocketEvent } from "../../hooks/useSocketEvent";
 
 const STATUS_STYLES = {
   PLACED: "text-blue-700 bg-blue-50",
@@ -27,6 +28,12 @@ export default function Orders() {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  useSocketEvent("order:status", (updated) => {
+    setOrders((current) =>
+      current ? current.map((o) => (o.id === updated.id ? { ...o, status: updated.status } : o)) : current
+    );
+  });
 
   async function handleCancel(orderId) {
     setCancellingId(orderId);

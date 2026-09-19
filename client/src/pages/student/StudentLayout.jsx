@@ -1,13 +1,31 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
+import { useToast } from "../../context/ToastContext";
+import { useSocketEvent } from "../../hooks/useSocketEvent";
 
 const navLinkClass = ({ isActive }) =>
   `text-sm ${isActive ? "font-semibold underline" : "opacity-90 hover:opacity-100"}`;
 
+const STATUS_LABEL = {
+  ACCEPTED: "accepted",
+  PREPARING: "being prepared",
+  READY: "ready for pickup",
+  REJECTED: "rejected",
+  CANCELLED: "cancelled",
+};
+
 export default function StudentLayout() {
   const { user, logout } = useAuth();
   const { totalCount } = useCart();
+  const { showToast } = useToast();
+
+  // Lives here (not on the Orders page) so a status update shows a toast
+  // no matter which student page is currently open.
+  useSocketEvent("order:status", (order) => {
+    const label = STATUS_LABEL[order.status] || order.status;
+    showToast(`${order.vendor?.shopName || "Your order"} is now ${label}`);
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { api } from "../api/client";
+import { disconnectSocket } from "../lib/socket";
 
 const AuthContext = createContext(null);
 
@@ -29,6 +30,9 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     await api.post("/auth/logout", {});
+    // A stale socket would otherwise keep the previous session's room
+    // membership; the next login creates a fresh one.
+    disconnectSocket();
     setUser(null);
   }, []);
 
