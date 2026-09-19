@@ -1,27 +1,54 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import { HOME_BY_ROLE } from "./lib/roles";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import StudentHome from "./pages/student/StudentHome";
+import VendorHome from "./pages/vendor/VendorHome";
+import AdminHome from "./pages/admin/AdminHome";
 
-// Placeholder shell for Phase 1. Auth, routing guards, and the real
-// pages for each role are built out in Phase 2 onward.
-function Placeholder({ title }) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
-        <p className="mt-2 text-gray-500">UniPay - coming in the next phase</p>
-      </div>
-    </div>
-  );
+function RootRedirect() {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  return <Navigate to={user ? HOME_BY_ROLE[user.role] : "/login"} replace />;
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<Placeholder title="Login" />} />
-        <Route path="/register" element={<Placeholder title="Register" />} />
-        <Route path="*" element={<Placeholder title="Not Found" />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<RootRedirect />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/student"
+            element={
+              <ProtectedRoute allowedRoles={["STUDENT"]}>
+                <StudentHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor"
+            element={
+              <ProtectedRoute allowedRoles={["VENDOR"]}>
+                <VendorHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <AdminHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

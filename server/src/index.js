@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { createServer } from "node:http";
 import { initSocket } from "./lib/socket.js";
+import authRoutes from "./routes/auth.routes.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -21,8 +22,15 @@ app.get("/api/health", (req, res) => {
   res.json({ ok: true });
 });
 
-// Route modules are mounted here as each phase adds them, e.g.:
-// app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes);
+// Further route modules are mounted here as each phase adds them.
+
+// Centralized error handler: any thrown/rejected error from an
+// asyncHandler-wrapped route lands here instead of crashing the process.
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: "Internal server error" });
+});
 
 initSocket(httpServer);
 
