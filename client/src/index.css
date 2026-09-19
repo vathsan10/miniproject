@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --ink: #0a0a0a;
+  --ink-soft: #717784;
+  --surface: #f4f4f4;
+  --surface-card: #ffffff;
+  --ghost: #d7dae1;
+  --hairline: #e6e8ec;
+  --on-brand: #ffffff;
+
+  /* Base brand family (from the Baseline design system). */
+  --brand: #2563c9;
+  --brand-deep: #0f2f63;
+  --brand-light: #5790e6;
+  --accent-teal: #0b6e97;
+
+  /* Distinct per-role accent, so it's always obvious which interface
+     you're in - mapped onto the same brand family rather than
+     unrelated hues, so every screen still reads as one system. */
+  --role-student: var(--brand);
+  --role-student-deep: #1c4a94;
+  --role-vendor: var(--accent-teal);
+  --role-vendor-deep: #084f6d;
+  --role-admin: var(--brand-deep);
+  --role-admin-deep: #081d40;
+
+  --radius-card: 1.5rem;
+  --radius-card-lg: 2rem;
+  --radius-pill: 62.5rem;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--ink);
+  font-family: "Onest", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-light);
+  outline-offset: 2px;
+}
+
+@keyframes loader-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes reveal-word {
+  from {
+    transform: translateY(115%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

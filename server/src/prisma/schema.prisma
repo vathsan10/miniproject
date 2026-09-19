@@ -1,0 +1,127 @@
+// UniPay database schema.
+// Wallet balance is intentionally NOT a stored column: it is always
+// derived as sum(TOPUP + REFUND) - sum(PURCHASE) from Transaction rows.
+// This makes the ledger the single source of truth and avoids balance
+// drifting out of sync with what actually happened.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // Only this line changes to move to Postgres in production:
+  // provider = "postgresql"
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Prisma's SQLite connector has no native enum support, so role/status/type
+// fields are plain strings, validated against the constants in
+// src/lib/constants.js (via zod) at the application layer instead. This
+// still works unchanged with a postgresql datasource.
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String // STUDENT | VENDOR | ADMIN
+  rollNo       String?
+  createdAt    DateTime @default(now())
+
+  vendor        Vendor?
+  orders        Order[]        @relation("StudentOrders")
+  transactions  Transaction[]
+  paymentIntents PaymentIntent[]
+}
+
+model Vendor {
+  id        String  @id @default(uuid())
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id])
+  shopName  String
+  isOpen    Boolean @default(true)
+
+  menuItems MenuItem[]
+  orders    Order[]    @relation("VendorOrders")
+}
+
+model MenuItem {
+  id          String   @id @default(uuid())
+  vendorId    String
+  vendor      Vendor   @relation(fields: [vendorId], references: [id])
+  name        String
+  description String?
+  price       Int
+  stock       Int
+  isAvailable Boolean  @default(true)
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+
+  orderItems OrderItem[]
+
+  @@index([vendorId])
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  studentId   String
+  student     User        @relation("StudentOrders", fields: [studentId], references: [id])
+  vendorId    String
+  vendor      Vendor      @relation("VendorOrders", fields: [vendorId], references: [id])
+  total       Int
+  status      String   @default("PLACED") // PLACED|ACCEPTED|PREPARING|READY|COLLECTED|REJECTED|CANCELLED
+  pickupTime  DateTime?
+  // Random UUID, never the order id itself, so a QR code can't be
+  // reconstructed or guessed from a visible order number.
+  pickupToken String   @unique @default(uuid())
+  backupCode  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items OrderItem[]
+
+  @@index([vendorId, status])
+  @@index([studentId])
+}
+
+model OrderItem {
+  id            String   @id @default(uuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id])
+  menuItemId    String
+  menuItem      MenuItem @relation(fields: [menuItemId], references: [id])
+  quantity      Int
+  // Price is copied at order time so later menu price edits never change
+  // the amount of a past order.
+  priceAtOrder  Int
+
+  @@index([orderId])
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String // TOPUP | PURCHASE | REFUND
+  amount    Int
+  // Payment id (top-up) or order id (purchase/refund) - human/debug trail only.
+  reference String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PaymentIntent {
+  id             String        @id @default(uuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id])
+  amount         Int
+  gatewayOrderId String   @unique
+  status         String   @default("CREATED") // CREATED | PAID | FAILED
+  // Set only once the payment is verified and credited. The unique
+  // constraint is what makes crediting idempotent: a retried verify
+  // call for the same Razorpay payment can never credit twice.
+  paymentId      String?  @unique
+  createdAt      DateTime @default(now())
+}
