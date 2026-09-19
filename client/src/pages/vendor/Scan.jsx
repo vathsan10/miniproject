@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { api } from "../../api/client";
 import { formatCredits } from "../../lib/format";
+import Eyebrow from "../../components/motion/Eyebrow";
+import Reveal from "../../components/motion/Reveal";
+import PillButton from "../../components/motion/PillButton";
 
 const SCANNER_ELEMENT_ID = "qr-reader";
 
@@ -75,58 +78,63 @@ export default function Scan() {
   return (
     <div className="space-y-4">
       {!scanning ? (
-        <button
-          onClick={startScanner}
-          className="w-full rounded-lg bg-amber-600 text-white py-2 text-sm font-medium hover:bg-amber-700"
-        >
-          Start Camera Scan
-        </button>
+        <PillButton onClick={startScanner} accent="var(--role-vendor)" accentDeep="var(--role-vendor-deep)" className="w-full">
+          Start camera scan
+        </PillButton>
       ) : (
-        <button
-          onClick={stopScanner}
-          className="w-full rounded-lg bg-gray-200 text-gray-700 py-2 text-sm font-medium"
-        >
-          Stop Camera
-        </button>
+        <PillButton onClick={stopScanner} variant="outline" showArrow={false} className="w-full">
+          Stop camera
+        </PillButton>
       )}
-      <div id={SCANNER_ELEMENT_ID} className={scanning ? "rounded-xl overflow-hidden" : "hidden"} />
+      <div id={SCANNER_ELEMENT_ID} className={scanning ? "overflow-hidden" : "hidden"} style={{ borderRadius: "var(--radius-card)" }} />
 
-      <form onSubmit={handleManualSubmit} className="bg-white rounded-xl border border-gray-200 p-4 space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Or enter the 6-digit backup code</label>
+      <Reveal
+        as="form"
+        onSubmit={handleManualSubmit}
+        className="bg-white p-5 space-y-2"
+        style={{ borderRadius: "var(--radius-card)", border: "1px solid var(--hairline)" }}
+      >
+        <Eyebrow>Backup code</Eyebrow>
+        <label className="block text-xs font-medium uppercase tracking-wide text-[var(--ink-soft)]">
+          Or enter the 6-digit code
+        </label>
         <div className="flex gap-2">
           <input
             value={manualCode}
             onChange={(e) => setManualCode(e.target.value)}
             maxLength={6}
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="flex-1 rounded-xl border px-4 py-3 text-sm tracking-widest text-center focus:outline-none focus:ring-2"
+            style={{ borderColor: "var(--hairline)", "--tw-ring-color": "var(--role-vendor)" }}
           />
-          <button
-            type="submit"
-            disabled={verifying}
-            className="rounded-lg bg-amber-600 text-white px-4 text-sm font-medium hover:bg-amber-700 disabled:opacity-50"
-          >
+          <PillButton type="submit" disabled={verifying} showArrow={false} accent="var(--role-vendor)" accentDeep="var(--role-vendor-deep)">
             Verify
-          </button>
+          </PillButton>
         </div>
-      </form>
+      </Reveal>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {result && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-          <p className="text-sm font-semibold text-green-800">Collected - hand over:</p>
-          <p className="text-sm text-gray-700 mt-1">
+        <Reveal
+          as="div"
+          className="p-5"
+          style={{ borderRadius: "var(--radius-card)", background: "rgba(16,163,74,0.08)", border: "1px solid rgba(16,163,74,0.25)" }}
+        >
+          <p className="text-sm font-semibold" style={{ color: "#0f8a3f" }}>
+            Collected - hand over:
+          </p>
+          <p className="text-sm text-[var(--ink)] mt-1">
             {result.student?.name} ({result.student?.rollNo})
           </p>
           <ul className="mt-2 space-y-0.5">
             {result.items.map((oi) => (
-              <li key={oi.id} className="text-sm text-gray-800">
+              <li key={oi.id} className="text-sm text-[var(--ink)]">
                 {oi.quantity}x {oi.menuItem.name}
               </li>
             ))}
           </ul>
-          <p className="text-sm font-semibold text-gray-900 mt-2">{formatCredits(result.total)}</p>
-        </div>
+          <p className="text-sm font-semibold text-[var(--ink)] mt-2">{formatCredits(result.total)}</p>
+        </Reveal>
       )}
     </div>
   );

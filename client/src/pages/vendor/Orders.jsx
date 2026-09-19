@@ -3,6 +3,9 @@ import { api } from "../../api/client";
 import { formatCredits, formatDateTime } from "../../lib/format";
 import { useSocketEvent } from "../../hooks/useSocketEvent";
 import { playNewOrderSound } from "../../lib/notifySound";
+import Eyebrow from "../../components/motion/Eyebrow";
+import Reveal from "../../components/motion/Reveal";
+import PillButton from "../../components/motion/PillButton";
 
 const COLUMNS = [
   { status: "PLACED", label: "Placed" },
@@ -17,13 +20,13 @@ function actionsFor(order) {
   switch (order.status) {
     case "PLACED":
       return [
-        { label: "Accept", status: "ACCEPTED", style: "bg-green-600 hover:bg-green-700" },
-        { label: "Reject", status: "REJECTED", style: "bg-red-600 hover:bg-red-700" },
+        { label: "Accept", status: "ACCEPTED", accent: "#0f8a3f", accentDeep: "#0b6b31" },
+        { label: "Reject", status: "REJECTED", accent: "#dc2626", accentDeep: "#b91c1c" },
       ];
     case "ACCEPTED":
-      return [{ label: "Start Preparing", status: "PREPARING", style: "bg-amber-600 hover:bg-amber-700" }];
+      return [{ label: "Start Preparing", status: "PREPARING", accent: "var(--role-vendor)", accentDeep: "var(--role-vendor-deep)" }];
     case "PREPARING":
-      return [{ label: "Mark Ready", status: "READY", style: "bg-amber-600 hover:bg-amber-700" }];
+      return [{ label: "Mark Ready", status: "READY", accent: "var(--role-vendor)", accentDeep: "var(--role-vendor-deep)" }];
     default:
       return [];
   }
@@ -81,7 +84,7 @@ export default function Orders() {
   }
 
   if (error) return <p className="text-sm text-red-600">{error}</p>;
-  if (orders === null) return <p className="text-sm text-gray-400">Loading...</p>;
+  if (orders === null) return <p className="text-sm text-[var(--ink-soft)]">Loading...</p>;
 
   return (
     <div className="space-y-6">
@@ -89,53 +92,57 @@ export default function Orders() {
         const columnOrders = orders.filter((o) => o.status === col.status);
         return (
           <div key={col.status}>
-            <h2 className="text-sm font-semibold text-gray-700 mb-2">
+            <Eyebrow>
               {col.label} ({columnOrders.length})
-            </h2>
+            </Eyebrow>
             {columnOrders.length === 0 ? (
-              <p className="text-sm text-gray-400">No orders here.</p>
+              <p className="text-sm text-[var(--ink-soft)] mt-2">No orders here.</p>
             ) : (
-              <ul className="space-y-2">
+              <ul className="space-y-2 mt-3">
                 {columnOrders.map((order) => (
-                  <li
+                  <Reveal
                     key={order.id}
-                    className={`bg-white rounded-xl border p-3 transition-shadow ${
-                      justArrivedId === order.id
-                        ? "border-amber-400 ring-2 ring-amber-300"
-                        : "border-gray-200"
-                    }`}
+                    as="li"
+                    y={16}
+                    className="bg-white p-4 transition-shadow"
+                    style={{
+                      borderRadius: "var(--radius-card)",
+                      border: justArrivedId === order.id ? "1px solid var(--role-vendor)" : "1px solid var(--hairline)",
+                      boxShadow: justArrivedId === order.id ? "0 0 0 3px rgba(11,110,151,0.2)" : "none",
+                    }}
                   >
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-[var(--ink)]">
                         {order.student?.name || "Student"}
                       </p>
-                      <p className="text-xs text-gray-400">{formatDateTime(order.createdAt)}</p>
+                      <p className="text-xs text-[var(--ink-soft)]">{formatDateTime(order.createdAt)}</p>
                     </div>
                     <ul className="mt-1 space-y-0.5">
                       {order.items.map((oi) => (
-                        <li key={oi.id} className="text-xs text-gray-600">
+                        <li key={oi.id} className="text-xs text-[var(--ink-soft)]">
                           {oi.quantity}x {oi.menuItem.name}
                         </li>
                       ))}
                     </ul>
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {formatCredits(order.total)}
-                      </p>
+                    <div className="flex items-center justify-between mt-3">
+                      <p className="text-sm font-semibold text-[var(--ink)]">{formatCredits(order.total)}</p>
                       <div className="flex gap-2">
                         {actionsFor(order).map((action) => (
-                          <button
+                          <PillButton
                             key={action.status}
-                            onClick={() => act(order, action.status)}
+                            size="sm"
+                            showArrow={false}
+                            accent={action.accent}
+                            accentDeep={action.accentDeep}
                             disabled={actingId === order.id}
-                            className={`text-xs text-white font-medium px-2 py-1 rounded-lg disabled:opacity-50 ${action.style}`}
+                            onClick={() => act(order, action.status)}
                           >
                             {action.label}
-                          </button>
+                          </PillButton>
                         ))}
                       </div>
                     </div>
-                  </li>
+                  </Reveal>
                 ))}
               </ul>
             )}

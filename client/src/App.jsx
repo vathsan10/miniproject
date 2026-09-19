@@ -1,10 +1,13 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { ToastProvider } from "./context/ToastContext";
+import { MotionReadyProvider, useMotionReady } from "./context/MotionReadyContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { HOME_BY_ROLE } from "./lib/roles";
+import { initLenis } from "./lib/lenisSetup";
+import Loader from "./components/motion/Loader";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import StudentLayout from "./pages/student/StudentLayout";
@@ -29,61 +32,79 @@ function RootRedirect() {
   return <Navigate to={user ? HOME_BY_ROLE[user.role] : "/login"} replace />;
 }
 
+function AppShell() {
+  const { setReady } = useMotionReady();
+
+  useEffect(() => {
+    initLenis();
+    window.scrollTo(0, 0);
+  }, []);
+
+  return (
+    <>
+      <Loader onReady={() => setReady(true)} />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<RootRedirect />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/student"
+            element={
+              <ProtectedRoute allowedRoles={["STUDENT"]}>
+                <StudentLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="menu" element={<Menu />} />
+            <Route path="cart" element={<Cart />} />
+            <Route path="orders" element={<StudentOrders />} />
+            <Route path="transactions" element={<Transactions />} />
+          </Route>
+          <Route
+            path="/vendor"
+            element={
+              <ProtectedRoute allowedRoles={["VENDOR"]}>
+                <VendorLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<VendorOrders />} />
+            <Route path="menu" element={<MenuManager />} />
+            <Route
+              path="scan"
+              element={
+                <Suspense fallback={<p className="text-sm text-gray-400">Loading scanner...</p>}>
+                  <Scan />
+                </Suspense>
+              }
+            />
+            <Route path="sales" element={<Sales />} />
+          </Route>
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <AdminHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </>
+  );
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <ToastProvider>
         <CartProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<RootRedirect />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route
-                path="/student"
-                element={
-                  <ProtectedRoute allowedRoles={["STUDENT"]}>
-                    <StudentLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<Dashboard />} />
-                <Route path="menu" element={<Menu />} />
-                <Route path="cart" element={<Cart />} />
-                <Route path="orders" element={<StudentOrders />} />
-                <Route path="transactions" element={<Transactions />} />
-              </Route>
-              <Route
-                path="/vendor"
-                element={
-                  <ProtectedRoute allowedRoles={["VENDOR"]}>
-                    <VendorLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<VendorOrders />} />
-                <Route path="menu" element={<MenuManager />} />
-                <Route
-                  path="scan"
-                  element={
-                    <Suspense fallback={<p className="text-sm text-gray-400">Loading scanner...</p>}>
-                      <Scan />
-                    </Suspense>
-                  }
-                />
-                <Route path="sales" element={<Sales />} />
-              </Route>
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute allowedRoles={["ADMIN"]}>
-                    <AdminHome />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </BrowserRouter>
+          <MotionReadyProvider>
+            <AppShell />
+          </MotionReadyProvider>
         </CartProvider>
       </ToastProvider>
     </AuthProvider>

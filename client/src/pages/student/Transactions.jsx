@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { formatCredits, formatDateTime } from "../../lib/format";
+import Reveal from "../../components/motion/Reveal";
 
 const TYPE_STYLES = {
-  TOPUP: "text-green-700 bg-green-50",
-  PURCHASE: "text-red-700 bg-red-50",
-  REFUND: "text-blue-700 bg-blue-50",
+  TOPUP: { background: "rgba(16,163,74,0.12)", color: "#0f8a3f" },
+  PURCHASE: { background: "rgba(220,38,38,0.1)", color: "#b91c1c" },
+  REFUND: { background: "rgba(37,99,201,0.1)", color: "var(--brand)" },
 };
 
 const SIGN = { TOPUP: "+", PURCHASE: "-", REFUND: "+" };
@@ -22,30 +23,34 @@ export default function Transactions() {
   }, []);
 
   if (error) return <p className="text-sm text-red-600">{error}</p>;
-  if (transactions === null) return <p className="text-sm text-gray-400">Loading...</p>;
+  if (transactions === null) return <p className="text-sm text-[var(--ink-soft)]">Loading...</p>;
   if (transactions.length === 0) {
-    return <p className="text-sm text-gray-400">No transactions yet.</p>;
+    return <p className="text-sm text-[var(--ink-soft)]">No transactions yet.</p>;
   }
 
   return (
     <ul className="space-y-2">
-      {transactions.map((t) => (
-        <li
+      {transactions.map((t, i) => (
+        <Reveal
           key={t.id}
-          className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between"
+          as="li"
+          delay={i * 40}
+          y={16}
+          className="bg-white p-4 flex items-center justify-between"
+          style={{ borderRadius: "var(--radius-card)", border: "1px solid var(--hairline)" }}
         >
           <div>
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${TYPE_STYLES[t.type]}`}>
+            <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={TYPE_STYLES[t.type]}>
               {t.type}
             </span>
-            <p className="text-xs text-gray-400 mt-1">{formatDateTime(t.createdAt)}</p>
-            {t.reference && <p className="text-xs text-gray-300 mt-0.5">{t.reference}</p>}
+            <p className="text-xs text-[var(--ink-soft)] mt-1">{formatDateTime(t.createdAt)}</p>
+            {t.reference && <p className="text-xs text-[var(--ghost)] mt-0.5">{t.reference}</p>}
           </div>
-          <p className="font-semibold text-gray-900">
+          <p className="font-semibold text-[var(--ink)]">
             {SIGN[t.type]}
             {formatCredits(t.amount)}
           </p>
-        </li>
+        </Reveal>
       ))}
     </ul>
   );

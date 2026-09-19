@@ -3,6 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../api/client";
 import { formatCredits } from "../../lib/format";
 import { useCart } from "../../context/CartContext";
+import Eyebrow from "../../components/motion/Eyebrow";
+import RevealText from "../../components/motion/RevealText";
+import PillButton from "../../components/motion/PillButton";
+import Reveal from "../../components/motion/Reveal";
+
+const cardStyle = { borderRadius: "var(--radius-card)", border: "1px solid var(--hairline)" };
 
 export default function Cart() {
   const { vendorId, vendorName, items, updateQuantity, clearCart, totalPrice } = useCart();
@@ -21,9 +27,9 @@ export default function Cart() {
 
   if (items.length === 0) {
     return (
-      <p className="text-sm text-gray-400">
+      <p className="text-sm text-[var(--ink-soft)]">
         Your cart is empty.{" "}
-        <Link to="/student/menu" className="text-indigo-600 underline">
+        <Link to="/student/menu" className="font-medium" style={{ color: "var(--role-student)" }}>
           Browse the menu
         </Link>{" "}
         to add items.
@@ -63,21 +69,20 @@ export default function Cart() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm font-medium text-gray-700">{vendorName}</p>
+      <Eyebrow>{vendorName}</Eyebrow>
+      <RevealText as="h1" text="Your order" className="block text-2xl font-medium tracking-tight -mt-1" />
       <ul className="space-y-2">
         {items.map((item) => (
-          <li
-            key={item.menuItemId}
-            className="bg-white rounded-xl border border-gray-200 p-3 flex items-center justify-between"
-          >
+          <li key={item.menuItemId} className="bg-white p-4 flex items-center justify-between" style={cardStyle}>
             <div>
-              <p className="text-sm font-medium text-gray-900">{item.name}</p>
-              <p className="text-xs text-gray-400">{formatCredits(item.price)} each</p>
+              <p className="text-sm font-medium text-[var(--ink)]">{item.name}</p>
+              <p className="text-xs text-[var(--ink-soft)]">{formatCredits(item.price)} each</p>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => updateQuantity(item.menuItemId, item.quantity - 1)}
-                className="w-6 h-6 rounded-full bg-gray-100 text-gray-700"
+                className="w-7 h-7 rounded-full flex items-center justify-center"
+                style={{ background: "var(--surface)", color: "var(--ink)" }}
               >
                 -
               </button>
@@ -85,7 +90,8 @@ export default function Cart() {
               <button
                 onClick={() => updateQuantity(item.menuItemId, item.quantity + 1)}
                 disabled={item.quantity >= item.stock}
-                className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 disabled:opacity-40"
+                className="w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-40"
+                style={{ background: "var(--surface)", color: "var(--ink)" }}
               >
                 +
               </button>
@@ -94,18 +100,21 @@ export default function Cart() {
         ))}
       </ul>
 
-      <form onSubmit={handleCheckout} className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
+      <Reveal as="form" onSubmit={handleCheckout} className="bg-white p-5 space-y-3" style={cardStyle}>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Pickup time</label>
+          <label className="block text-xs font-medium uppercase tracking-wide text-[var(--ink-soft)] mb-1.5">
+            Pickup time
+          </label>
           <input
             type="time"
             required
             value={pickupTime}
             onChange={(e) => setPickupTime(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+            style={{ borderColor: "var(--hairline)", "--tw-ring-color": "var(--role-student)" }}
           />
         </div>
-        <div className="flex items-center justify-between text-sm font-semibold text-gray-900">
+        <div className="flex items-center justify-between text-sm font-semibold text-[var(--ink)]">
           <span>Total</span>
           <span>{formatCredits(totalPrice)}</span>
         </div>
@@ -118,14 +127,16 @@ export default function Cart() {
           </p>
         )}
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
+        <PillButton
           type="submit"
           disabled={submitting || insufficientBalance}
-          className="w-full rounded-lg bg-indigo-600 text-white py-2 text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+          accent="var(--role-student)"
+          accentDeep="var(--role-student-deep)"
+          className="w-full"
         >
           {submitting ? "Placing order..." : "Place Order"}
-        </button>
-      </form>
+        </PillButton>
+      </Reveal>
     </div>
   );
 }

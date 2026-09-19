@@ -2,6 +2,10 @@ import { useState } from "react";
 import { api } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { loadRazorpayScript } from "../../lib/razorpaySdk";
+import Modal from "../../components/motion/Modal";
+import Eyebrow from "../../components/motion/Eyebrow";
+import RevealText from "../../components/motion/RevealText";
+import PillButton from "../../components/motion/PillButton";
 
 export default function TopUp({ onClose, onSuccess }) {
   const { user } = useAuth();
@@ -44,7 +48,7 @@ export default function TopUp({ onClose, onSuccess }) {
         description: "Wallet top-up",
         order_id: init.orderId,
         prefill: { name: user.name, email: user.email },
-        theme: { color: "#4f46e5" },
+        theme: { color: "#2563c9" },
         handler: async (response) => {
           try {
             await finishTopup(init.paymentIntentId, {
@@ -71,40 +75,48 @@ export default function TopUp({ onClose, onSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center px-4 z-10">
-      <div className="w-full max-w-sm bg-white rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Top Up</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600" aria-label="Close">
-            ✕
-          </button>
+    <Modal onClose={onClose} maxWidth="24rem">
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <Eyebrow>Wallet</Eyebrow>
+          <RevealText as="h2" text="Top Up" className="block text-3xl font-medium tracking-tight mt-1" />
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Amount (₹10 - ₹5000)
-            </label>
-            <input
-              type="number"
-              min={10}
-              max={5000}
-              step={1}
-              required
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-lg bg-indigo-600 text-white py-2 text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
-          >
-            {submitting ? "Processing..." : "Pay"}
-          </button>
-        </form>
+        <button
+          onClick={onClose}
+          className="w-9 h-9 rounded-full flex items-center justify-center text-[var(--ink-soft)] hover:bg-[var(--surface)]"
+          aria-label="Close"
+        >
+          ✕
+        </button>
       </div>
-    </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-xs font-medium uppercase tracking-wide text-[var(--ink-soft)] mb-1.5">
+            Amount (₹10 - ₹5000)
+          </label>
+          <input
+            type="number"
+            min={10}
+            max={5000}
+            step={1}
+            required
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+            style={{ borderColor: "var(--hairline)", "--tw-ring-color": "var(--role-student)" }}
+          />
+        </div>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <PillButton
+          type="submit"
+          disabled={submitting}
+          accent="var(--role-student)"
+          accentDeep="var(--role-student-deep)"
+          className="w-full"
+        >
+          {submitting ? "Processing..." : "Pay"}
+        </PillButton>
+      </form>
+    </Modal>
   );
 }

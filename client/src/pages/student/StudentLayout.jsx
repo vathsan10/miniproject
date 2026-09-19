@@ -3,9 +3,10 @@ import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
 import { useSocketEvent } from "../../hooks/useSocketEvent";
+import BrandMark from "../../components/motion/BrandMark";
 
 const navLinkClass = ({ isActive }) =>
-  `text-sm ${isActive ? "font-semibold underline" : "opacity-90 hover:opacity-100"}`;
+  `text-sm transition-colors ${isActive ? "text-white font-medium" : "text-white/70 hover:text-white"}`;
 
 const STATUS_LABEL = {
   ACCEPTED: "accepted",
@@ -28,15 +29,23 @@ export default function StudentLayout() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-indigo-600 text-white px-4 py-3">
+    <main className="min-h-screen w-full p-2 sm:p-3" style={{ background: "var(--surface)" }}>
+      <header
+        className="px-5 py-4 sm:px-6"
+        style={{ background: "var(--role-student)", borderRadius: "var(--radius-card)" }}
+      >
         <div className="flex items-center justify-between">
-          <span className="font-semibold">UniPay · Student</span>
-          <button onClick={logout} className="text-sm underline">
+          <div className="flex items-center gap-2 text-white">
+            <BrandMark className="w-5 h-5" />
+            <span className="text-sm font-medium uppercase" style={{ letterSpacing: "0.18em" }}>
+              UniPay
+            </span>
+          </div>
+          <button onClick={logout} className="text-xs font-medium uppercase text-white/80 hover:text-white tracking-wide">
             Logout
           </button>
         </div>
-        <nav className="flex gap-4 mt-2 flex-wrap">
+        <nav className="flex gap-4 mt-3 flex-wrap">
           <NavLink to="/student" end className={navLinkClass}>
             Dashboard
           </NavLink>
@@ -54,12 +63,12 @@ export default function StudentLayout() {
           </NavLink>
         </nav>
       </header>
-      <main className="p-4 max-w-md mx-auto">
-        <p className="text-xs text-gray-400 mb-2">
+      <div className="max-w-md mx-auto mt-3 px-1">
+        <p className="text-xs text-[var(--ink-soft)] mb-3">
           {user.name} · {user.rollNo}
         </p>
         <Outlet />
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }

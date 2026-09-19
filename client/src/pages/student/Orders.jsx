@@ -3,15 +3,17 @@ import { api } from "../../api/client";
 import { formatCredits, formatDateTime } from "../../lib/format";
 import { useSocketEvent } from "../../hooks/useSocketEvent";
 import PickupModal from "./PickupModal";
+import Reveal from "../../components/motion/Reveal";
+import PillButton from "../../components/motion/PillButton";
 
 const STATUS_STYLES = {
-  PLACED: "text-blue-700 bg-blue-50",
-  ACCEPTED: "text-amber-700 bg-amber-50",
-  PREPARING: "text-amber-700 bg-amber-50",
-  READY: "text-green-700 bg-green-50",
-  COLLECTED: "text-gray-700 bg-gray-100",
-  REJECTED: "text-red-700 bg-red-50",
-  CANCELLED: "text-gray-500 bg-gray-100",
+  PLACED: { background: "rgba(37,99,201,0.1)", color: "var(--brand)" },
+  ACCEPTED: { background: "rgba(11,110,151,0.1)", color: "var(--accent-teal)" },
+  PREPARING: { background: "rgba(11,110,151,0.1)", color: "var(--accent-teal)" },
+  READY: { background: "rgba(16,163,74,0.12)", color: "#0f8a3f" },
+  COLLECTED: { background: "var(--surface)", color: "var(--ink-soft)" },
+  REJECTED: { background: "rgba(220,38,38,0.1)", color: "#b91c1c" },
+  CANCELLED: { background: "var(--surface)", color: "var(--ink-soft)" },
 };
 
 export default function Orders() {
@@ -51,48 +53,60 @@ export default function Orders() {
   }
 
   if (error) return <p className="text-sm text-red-600">{error}</p>;
-  if (orders === null) return <p className="text-sm text-gray-400">Loading...</p>;
-  if (orders.length === 0) return <p className="text-sm text-gray-400">No orders yet.</p>;
+  if (orders === null) return <p className="text-sm text-[var(--ink-soft)]">Loading...</p>;
+  if (orders.length === 0) return <p className="text-sm text-[var(--ink-soft)]">No orders yet.</p>;
 
   return (
     <ul className="space-y-3">
-      {orders.map((order) => (
-        <li key={order.id} className="bg-white rounded-xl border border-gray-200 p-4">
+      {orders.map((order, i) => (
+        <Reveal
+          key={order.id}
+          as="li"
+          delay={i * 60}
+          className="bg-white p-5"
+          style={{ borderRadius: "var(--radius-card)", border: "1px solid var(--hairline)" }}
+        >
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-gray-900">{order.vendor.shopName}</p>
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[order.status]}`}>
+            <p className="text-sm font-medium text-[var(--ink)]">{order.vendor.shopName}</p>
+            <span
+              className="text-xs font-medium px-2.5 py-1 rounded-full"
+              style={STATUS_STYLES[order.status]}
+            >
               {order.status}
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-1">{formatDateTime(order.createdAt)}</p>
+          <p className="text-xs text-[var(--ink-soft)] mt-1">{formatDateTime(order.createdAt)}</p>
           <ul className="mt-2 space-y-0.5">
             {order.items.map((oi) => (
-              <li key={oi.id} className="text-xs text-gray-600">
+              <li key={oi.id} className="text-xs text-[var(--ink-soft)]">
                 {oi.quantity}x {oi.menuItem.name}
               </li>
             ))}
           </ul>
-          <div className="flex items-center justify-between mt-2">
-            <p className="text-sm font-semibold text-gray-900">{formatCredits(order.total)}</p>
+          <div className="flex items-center justify-between mt-3">
+            <p className="text-sm font-semibold text-[var(--ink)]">{formatCredits(order.total)}</p>
             {order.status === "PLACED" && (
               <button
                 onClick={() => handleCancel(order.id)}
                 disabled={cancellingId === order.id}
-                className="text-xs text-red-600 font-medium disabled:opacity-50"
+                className="text-xs text-red-600 font-medium uppercase tracking-wide disabled:opacity-50"
               >
                 {cancellingId === order.id ? "Cancelling..." : "Cancel"}
               </button>
             )}
             {order.status === "READY" && (
-              <button
+              <PillButton
                 onClick={() => setPickupOrderId(order.id)}
-                className="text-xs text-white font-medium px-2 py-1 rounded-lg bg-green-600 hover:bg-green-700"
+                accent="#0f8a3f"
+                accentDeep="#0b6b31"
+                showArrow={false}
+                size="sm"
               >
                 Show Pickup Code
-              </button>
+              </PillButton>
             )}
           </div>
-        </li>
+        </Reveal>
       ))}
       {pickupOrderId && (
         <PickupModal orderId={pickupOrderId} onClose={() => setPickupOrderId(null)} />

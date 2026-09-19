@@ -2,6 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../api/client";
 import { formatDateTime } from "../../lib/format";
+import BrandMark from "../../components/motion/BrandMark";
+import Eyebrow from "../../components/motion/Eyebrow";
+import RevealText from "../../components/motion/RevealText";
+import PillButton from "../../components/motion/PillButton";
+import Reveal from "../../components/motion/Reveal";
 
 const emptyForm = { name: "", email: "", password: "", shopName: "" };
 
@@ -50,89 +55,122 @@ export default function AdminHome() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-slate-800 text-white px-4 py-3 flex items-center justify-between">
-        <span className="font-semibold">UniPay · Admin</span>
-        <button onClick={logout} className="text-sm underline">
+    <main className="min-h-screen w-full p-2 sm:p-3" style={{ background: "var(--surface)" }}>
+      <header
+        className="px-5 py-4 sm:px-6 flex items-center justify-between"
+        style={{ background: "var(--role-admin)", borderRadius: "var(--radius-card)" }}
+      >
+        <div className="flex items-center gap-2 text-white">
+          <BrandMark className="w-5 h-5" />
+          <span className="text-sm font-medium uppercase" style={{ letterSpacing: "0.18em" }}>
+            UniPay · Admin
+          </span>
+        </div>
+        <button onClick={logout} className="text-xs font-medium uppercase text-white/80 hover:text-white tracking-wide">
           Logout
         </button>
       </header>
-      <main className="p-4 max-w-2xl mx-auto space-y-6">
-        <p className="text-xs text-gray-400">{user.name}</p>
 
-        <section className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="text-sm font-semibold text-gray-900 mb-3">Create Vendor</h2>
+      <div className="max-w-2xl mx-auto mt-3 px-1 space-y-4">
+        <p className="text-xs text-[var(--ink-soft)]">{user.name}</p>
+
+        <Reveal as="section" className="bg-white p-6" style={{ borderRadius: "var(--radius-card)", border: "1px solid var(--hairline)" }}>
+          <Eyebrow>Vendors</Eyebrow>
+          <RevealText as="h2" text="Create a vendor" className="block text-xl font-medium tracking-tight mt-1 mb-4" />
           <form onSubmit={handleCreate} className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Owner name</label>
+              <label className="block text-xs font-medium uppercase tracking-wide text-[var(--ink-soft)] mb-1.5">
+                Owner name
+              </label>
               <input
                 required
                 value={form.name}
                 onChange={updateField("name")}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+                style={{ borderColor: "var(--hairline)", "--tw-ring-color": "var(--role-admin)" }}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Shop name</label>
+              <label className="block text-xs font-medium uppercase tracking-wide text-[var(--ink-soft)] mb-1.5">
+                Shop name
+              </label>
               <input
                 required
                 value={form.shopName}
                 onChange={updateField("shopName")}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+                style={{ borderColor: "var(--hairline)", "--tw-ring-color": "var(--role-admin)" }}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-xs font-medium uppercase tracking-wide text-[var(--ink-soft)] mb-1.5">
+                Email
+              </label>
               <input
                 type="email"
                 required
                 value={form.email}
                 onChange={updateField("email")}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+                style={{ borderColor: "var(--hairline)", "--tw-ring-color": "var(--role-admin)" }}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-xs font-medium uppercase tracking-wide text-[var(--ink-soft)] mb-1.5">
+                Password
+              </label>
               <input
                 type="password"
                 required
                 minLength={6}
                 value={form.password}
                 onChange={updateField("password")}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+                style={{ borderColor: "var(--hairline)", "--tw-ring-color": "var(--role-admin)" }}
               />
             </div>
             {createError && <p className="text-sm text-red-600">{createError}</p>}
             {createSuccess && <p className="text-sm text-green-600">{createSuccess}</p>}
-            <button
+            <PillButton
               type="submit"
               disabled={creating}
-              className="w-full rounded-lg bg-slate-800 text-white py-2 text-sm font-medium hover:bg-slate-900 disabled:opacity-50"
+              accent="var(--role-admin)"
+              accentDeep="var(--role-admin-deep)"
+              className="w-full"
             >
               {creating ? "Creating..." : "Create vendor"}
-            </button>
+            </PillButton>
           </form>
-        </section>
+        </Reveal>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <section className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="text-sm font-semibold text-gray-900 mb-3">Vendors</h2>
+        <Reveal
+          as="section"
+          delay={80}
+          className="bg-white p-6"
+          style={{ borderRadius: "var(--radius-card)", border: "1px solid var(--hairline)" }}
+        >
+          <Eyebrow>Directory</Eyebrow>
+          <h2 className="text-lg font-medium tracking-tight mt-1 mb-3">Vendors</h2>
           {vendors === null ? (
-            <p className="text-sm text-gray-400">Loading...</p>
+            <p className="text-sm text-[var(--ink-soft)]">Loading...</p>
           ) : vendors.length === 0 ? (
-            <p className="text-sm text-gray-400">No vendors yet.</p>
+            <p className="text-sm text-[var(--ink-soft)]">No vendors yet.</p>
           ) : (
-            <ul className="space-y-2">
+            <ul className="divide-y" style={{ borderColor: "var(--hairline)" }}>
               {vendors.map((v) => (
-                <li key={v.id} className="flex items-center justify-between text-sm">
-                  <span className="text-gray-700">
-                    {v.shopName} <span className="text-gray-400">({v.user.email})</span>
+                <li key={v.id} className="flex items-center justify-between text-sm py-2.5">
+                  <span className="text-[var(--ink)]">
+                    {v.shopName} <span className="text-[var(--ink-soft)]">({v.user.email})</span>
                   </span>
                   <span
-                    className={`text-xs px-2 py-0.5 rounded-full ${
-                      v.isOpen ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
-                    }`}
+                    className="text-xs px-2.5 py-1 rounded-full font-medium"
+                    style={
+                      v.isOpen
+                        ? { background: "rgba(11,110,151,0.12)", color: "var(--accent-teal)" }
+                        : { background: "var(--surface)", color: "var(--ink-soft)" }
+                    }
                   >
                     {v.isOpen ? "Open" : "Closed"}
                   </span>
@@ -140,28 +178,34 @@ export default function AdminHome() {
               ))}
             </ul>
           )}
-        </section>
+        </Reveal>
 
-        <section className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="text-sm font-semibold text-gray-900 mb-3">Users</h2>
+        <Reveal
+          as="section"
+          delay={160}
+          className="bg-white p-6"
+          style={{ borderRadius: "var(--radius-card)", border: "1px solid var(--hairline)" }}
+        >
+          <Eyebrow>Directory</Eyebrow>
+          <h2 className="text-lg font-medium tracking-tight mt-1 mb-3">Users</h2>
           {users === null ? (
-            <p className="text-sm text-gray-400">Loading...</p>
+            <p className="text-sm text-[var(--ink-soft)]">Loading...</p>
           ) : (
-            <ul className="space-y-2">
+            <ul className="divide-y" style={{ borderColor: "var(--hairline)" }}>
               {users.map((u) => (
-                <li key={u.id} className="flex items-center justify-between text-sm">
-                  <span className="text-gray-700">
-                    {u.name} <span className="text-gray-400">({u.email})</span>
+                <li key={u.id} className="flex items-center justify-between text-sm py-2.5">
+                  <span className="text-[var(--ink)]">
+                    {u.name} <span className="text-[var(--ink-soft)]">({u.email})</span>
                   </span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-[var(--ink-soft)]">
                     {u.role} · {formatDateTime(u.createdAt)}
                   </span>
                 </li>
               ))}
             </ul>
           )}
-        </section>
-      </main>
-    </div>
+        </Reveal>
+      </div>
+    </main>
   );
 }

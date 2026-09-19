@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { api } from "../../api/client";
+import Modal from "../../components/motion/Modal";
+import Eyebrow from "../../components/motion/Eyebrow";
+import RevealText from "../../components/motion/RevealText";
+import PillButton from "../../components/motion/PillButton";
 
 const emptyForm = { name: "", description: "", price: "", stock: "", imageUrl: "" };
+const inputStyle = { borderColor: "var(--hairline)", "--tw-ring-color": "var(--role-vendor)" };
 
 export default function MenuItemForm({ item, onClose, onSaved }) {
   const isEdit = Boolean(item);
@@ -52,88 +57,110 @@ export default function MenuItemForm({ item, onClose, onSaved }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center px-4 z-10">
-      <div className="w-full max-w-sm bg-white rounded-xl p-5 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">{isEdit ? "Edit Item" : "Add Item"}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600" aria-label="Close">
-            ✕
-          </button>
+    <Modal onClose={onClose} maxWidth="24rem">
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <Eyebrow>Menu</Eyebrow>
+          <RevealText
+            as="h2"
+            text={isEdit ? "Edit item" : "Add item"}
+            className="block text-2xl font-medium tracking-tight mt-1"
+          />
         </div>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-            <input
-              required
-              maxLength={100}
-              value={form.name}
-              onChange={updateField("name")}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <input
-              maxLength={300}
-              value={form.description}
-              onChange={updateField("description")}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-            />
-          </div>
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
-              <input
-                type="number"
-                min={1}
-                step={1}
-                required
-                value={form.price}
-                onChange={updateField("price")}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-              <input
-                type="number"
-                min={0}
-                step={1}
-                required
-                value={form.stock}
-                onChange={updateField("stock")}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Image URL (optional)</label>
-            <input
-              value={form.imageUrl}
-              onChange={updateField("imageUrl")}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-            />
-          </div>
-          {isEdit && (
-            <label className="flex items-center gap-2 text-sm text-gray-700">
-              <input
-                type="checkbox"
-                checked={isAvailable}
-                onChange={(e) => setIsAvailable(e.target.checked)}
-              />
-              Available for order
-            </label>
-          )}
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-lg bg-amber-600 text-white py-2 text-sm font-medium hover:bg-amber-700 disabled:opacity-50"
-          >
-            {submitting ? "Saving..." : isEdit ? "Save changes" : "Add item"}
-          </button>
-        </form>
+        <button
+          onClick={onClose}
+          className="w-9 h-9 rounded-full flex items-center justify-center text-[var(--ink-soft)] hover:bg-[var(--surface)]"
+          aria-label="Close"
+        >
+          ✕
+        </button>
       </div>
-    </div>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div>
+          <label className="block text-xs font-medium uppercase tracking-wide text-[var(--ink-soft)] mb-1.5">
+            Name
+          </label>
+          <input
+            required
+            maxLength={100}
+            value={form.name}
+            onChange={updateField("name")}
+            className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+            style={inputStyle}
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium uppercase tracking-wide text-[var(--ink-soft)] mb-1.5">
+            Description
+          </label>
+          <input
+            maxLength={300}
+            value={form.description}
+            onChange={updateField("description")}
+            className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+            style={inputStyle}
+          />
+        </div>
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <label className="block text-xs font-medium uppercase tracking-wide text-[var(--ink-soft)] mb-1.5">
+              Price (₹)
+            </label>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              required
+              value={form.price}
+              onChange={updateField("price")}
+              className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+              style={inputStyle}
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-xs font-medium uppercase tracking-wide text-[var(--ink-soft)] mb-1.5">
+              Stock
+            </label>
+            <input
+              type="number"
+              min={0}
+              step={1}
+              required
+              value={form.stock}
+              onChange={updateField("stock")}
+              className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+              style={inputStyle}
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-xs font-medium uppercase tracking-wide text-[var(--ink-soft)] mb-1.5">
+            Image URL (optional)
+          </label>
+          <input
+            value={form.imageUrl}
+            onChange={updateField("imageUrl")}
+            className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+            style={inputStyle}
+          />
+        </div>
+        {isEdit && (
+          <label className="flex items-center gap-2 text-sm text-[var(--ink)]">
+            <input type="checkbox" checked={isAvailable} onChange={(e) => setIsAvailable(e.target.checked)} />
+            Available for order
+          </label>
+        )}
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <PillButton
+          type="submit"
+          disabled={submitting}
+          accent="var(--role-vendor)"
+          accentDeep="var(--role-vendor-deep)"
+          className="w-full"
+        >
+          {submitting ? "Saving..." : isEdit ? "Save changes" : "Add item"}
+        </PillButton>
+      </form>
+    </Modal>
   );
 }

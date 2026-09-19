@@ -108,6 +108,15 @@ out as critical:
   order, and QR pickup verification are each a single atomic DB
   transaction, so two students can never both grab the last unit of stock,
   and a QR/backup code can never be redeemed twice.
+- **Design system**: Onest (Google Font), a navy/blue palette in CSS custom
+  properties (`client/src/index.css`), and a small hand-rolled motion
+  toolkit (`client/src/lib/ticker.js`, `hooks/useSpring.js`,
+  `hooks/useInView.js`, `components/motion/`) — a shared rAF ticker drives
+  both Lenis smooth scroll and per-property spring physics
+  (`{tension, friction}`, matching react-spring's model) for hover lifts,
+  clip-mask heading reveals, and modal/loader transitions. Each role still
+  gets a distinct accent (`--role-student`/`--role-vendor`/`--role-admin`)
+  layered on the same brand family, so the interfaces read as one system.
 
 ## Project structure
 
