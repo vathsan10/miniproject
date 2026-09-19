@@ -3,9 +3,11 @@ import { HttpError } from "../lib/httpError.js";
 
 // The wallet has no stored balance column (see schema.prisma) - it is
 // always recomputed from the ledger so it can never drift from what
-// actually happened.
-export async function getBalance(userId) {
-  const totals = await prisma.transaction.groupBy({
+// actually happened. Accepts an optional transaction client so callers
+// (order.service.js) can read the balance from inside their own
+// $transaction, atomically with the debit that follows.
+export async function getBalance(userId, client = prisma) {
+  const totals = await client.transaction.groupBy({
     by: ["type"],
     where: { userId },
     _sum: { amount: true },

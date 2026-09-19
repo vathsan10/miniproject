@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.routes.js";
 import walletRoutes from "./routes/wallet.routes.js";
 import menuRoutes from "./routes/menu.routes.js";
 import vendorRoutes from "./routes/vendor.routes.js";
+import orderRoutes from "./routes/order.routes.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -29,6 +30,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/vendor", vendorRoutes);
+app.use("/api/orders", orderRoutes);
 // Further route modules are mounted here as each phase adds them.
 
 // Centralized error handler: any thrown/rejected error from an
