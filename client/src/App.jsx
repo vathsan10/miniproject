@@ -7,7 +7,9 @@ import Register from "./pages/Register";
 import StudentLayout from "./pages/student/StudentLayout";
 import Dashboard from "./pages/student/Dashboard";
 import Transactions from "./pages/student/Transactions";
-import VendorHome from "./pages/vendor/VendorHome";
+import Menu from "./pages/student/Menu";
+import VendorLayout from "./pages/vendor/VendorLayout";
+import MenuManager from "./pages/vendor/MenuManager";
 import AdminHome from "./pages/admin/AdminHome";
 
 function RootRedirect() {
@@ -33,16 +35,19 @@ export default function App() {
             }
           >
             <Route index element={<Dashboard />} />
+            <Route path="menu" element={<Menu />} />
             <Route path="transactions" element={<Transactions />} />
           </Route>
           <Route
             path="/vendor"
             element={
               <ProtectedRoute allowedRoles={["VENDOR"]}>
-                <VendorHome />
+                <VendorLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<MenuManager />} />
+          </Route>
           <Route
             path="/admin"
             element={

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../../api/client";
 import { formatCredits } from "../../lib/format";
 import TopUp from "./TopUp";
@@ -54,10 +55,13 @@ export default function Dashboard() {
         <p className="text-sm text-gray-400 mt-1">No orders yet - ordering arrives in Phase 5.</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <p className="text-sm font-medium text-gray-700">Menu</p>
-        <p className="text-sm text-gray-400 mt-1">Menu browsing arrives in Phase 4.</p>
-      </div>
+      <Link
+        to="/student/menu"
+        className="block bg-white rounded-xl border border-gray-200 p-5 hover:border-indigo-300"
+      >
+        <p className="text-sm font-medium text-gray-700">Browse Menu</p>
+        <p className="text-sm text-gray-400 mt-1">See what's available across open vendors.</p>
+      </Link>
     </div>
   );
 }

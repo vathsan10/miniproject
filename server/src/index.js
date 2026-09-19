@@ -6,6 +6,8 @@ import { createServer } from "node:http";
 import { initSocket } from "./lib/socket.js";
 import authRoutes from "./routes/auth.routes.js";
 import walletRoutes from "./routes/wallet.routes.js";
+import menuRoutes from "./routes/menu.routes.js";
+import vendorRoutes from "./routes/vendor.routes.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -25,6 +27,8 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/wallet", walletRoutes);
+app.use("/api/menu", menuRoutes);
+app.use("/api/vendor", vendorRoutes);
 // Further route modules are mounted here as each phase adds them.
 
 // Centralized error handler: any thrown/rejected error from an
