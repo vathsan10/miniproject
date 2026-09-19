@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
@@ -15,6 +16,10 @@ import StudentOrders from "./pages/student/Orders";
 import VendorLayout from "./pages/vendor/VendorLayout";
 import MenuManager from "./pages/vendor/MenuManager";
 import VendorOrders from "./pages/vendor/Orders";
+
+// html5-qrcode is a large dependency - only load it when a vendor
+// actually opens the scanner, not in everyone's initial bundle.
+const Scan = lazy(() => import("./pages/vendor/Scan"));
 import AdminHome from "./pages/admin/AdminHome";
 
 function RootRedirect() {
@@ -57,6 +62,14 @@ export default function App() {
               >
                 <Route index element={<VendorOrders />} />
                 <Route path="menu" element={<MenuManager />} />
+                <Route
+                  path="scan"
+                  element={
+                    <Suspense fallback={<p className="text-sm text-gray-400">Loading scanner...</p>}>
+                      <Scan />
+                    </Suspense>
+                  }
+                />
               </Route>
               <Route
                 path="/admin"

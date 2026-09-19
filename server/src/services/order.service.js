@@ -165,3 +165,41 @@ export async function updateOrderStatus({ orderId, vendorId, newStatus }) {
     });
   });
 }
+
+// Pickup verification (QR scan or typed backup code), scoped to the
+// scanning vendor and atomic: the code must belong to THIS vendor and
+// the order must currently be READY, then it's set to COLLECTED. The
+// conditional updateMany (status: "READY" -> "COLLECTED") closes the
+// race window between two near-simultaneous scans of the same code -
+// only one can win, so a second scan (concurrent or later) always sees
+// "Already collected" instead of collecting twice.
+export async function verifyPickup({ vendorId, code }) {
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.order.findFirst({
+      where: { vendorId, OR: [{ pickupToken: code }, { backupCode: code }] },
+      include: {
+        items: { include: { menuItem: { select: { name: true } } } },
+        student: { select: { name: true, rollNo: true } },
+      },
+    });
+    if (!order) {
+      throw new HttpError(404, "No matching order found for this vendor");
+    }
+    if (order.status === "COLLECTED") {
+      throw new HttpError(409, "Already collected");
+    }
+    if (order.status !== "READY") {
+      throw new HttpError(400, `Order is not ready for pickup (currently ${order.status})`);
+    }
+
+    const updated = await tx.order.updateMany({
+      where: { id: order.id, status: "READY" },
+      data: { status: "COLLECTED" },
+    });
+    if (updated.count === 0) {
+      throw new HttpError(409, "Already collected");
+    }
+
+    return { ...order, status: "COLLECTED" };
+  });
+}

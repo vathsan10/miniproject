@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { formatCredits, formatDateTime } from "../../lib/format";
 import { useSocketEvent } from "../../hooks/useSocketEvent";
+import PickupModal from "./PickupModal";
 
 const STATUS_STYLES = {
   PLACED: "text-blue-700 bg-blue-50",
@@ -17,6 +18,7 @@ export default function Orders() {
   const [orders, setOrders] = useState(null);
   const [error, setError] = useState("");
   const [cancellingId, setCancellingId] = useState(null);
+  const [pickupOrderId, setPickupOrderId] = useState(null);
 
   const refresh = useCallback(() => {
     api
@@ -81,9 +83,20 @@ export default function Orders() {
                 {cancellingId === order.id ? "Cancelling..." : "Cancel"}
               </button>
             )}
+            {order.status === "READY" && (
+              <button
+                onClick={() => setPickupOrderId(order.id)}
+                className="text-xs text-white font-medium px-2 py-1 rounded-lg bg-green-600 hover:bg-green-700"
+              >
+                Show Pickup Code
+              </button>
+            )}
           </div>
         </li>
       ))}
+      {pickupOrderId && (
+        <PickupModal orderId={pickupOrderId} onClose={() => setPickupOrderId(null)} />
+      )}
     </ul>
   );
 }

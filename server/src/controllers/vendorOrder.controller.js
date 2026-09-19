@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import { updateOrderStatus } from "../services/order.service.js";
+import { updateOrderStatus, verifyPickup } from "../services/order.service.js";
 import { emitOrderUpdate } from "../lib/socket.js";
 
 const ACTIVE_STATUSES = ["PLACED", "ACCEPTED", "PREPARING", "READY"];
@@ -22,6 +22,12 @@ export async function updateStatus(req, res) {
     vendorId: req.vendor.id,
     newStatus: req.body.status,
   });
+  emitOrderUpdate(order);
+  res.json({ order });
+}
+
+export async function verify(req, res) {
+  const order = await verifyPickup({ vendorId: req.vendor.id, code: req.body.code });
   emitOrderUpdate(order);
   res.json({ order });
 }

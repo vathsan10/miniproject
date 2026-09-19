@@ -23,6 +23,9 @@ export default function VendorLayout() {
           <NavLink to="/vendor/menu" className={navLinkClass}>
             Menu
           </NavLink>
+          <NavLink to="/vendor/scan" className={navLinkClass}>
+            Scan
+          </NavLink>
         </nav>
       </header>
       <main className="p-4 max-w-md mx-auto">

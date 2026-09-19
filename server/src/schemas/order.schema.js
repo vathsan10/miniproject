@@ -21,3 +21,9 @@ export const VENDOR_ORDER_ACTIONS = ["ACCEPTED", "PREPARING", "READY", "REJECTED
 export const updateOrderStatusSchema = z.object({
   status: z.enum(VENDOR_ORDER_ACTIONS),
 });
+
+// `code` is either a scanned pickupToken (UUID) or a typed 6-digit
+// backup code - the endpoint looks up both fields with one query.
+export const verifyPickupSchema = z.object({
+  code: z.string().trim().min(1),
+});
