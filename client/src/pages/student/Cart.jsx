@@ -22,6 +22,14 @@ export default function Cart() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Pre-fill with a valid default (now + 15 min) so Safari never sees a
+  // partially-filled hour/minute/AM-PM segment as an "invalid value" for
+  // anyone who submits without touching the field.
+  const defaultPickupTime = (() => {
+    const d = new Date(Date.now() + 15 * 60 * 1000);
+    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  })();
+
   useEffect(() => {
     api
       .get("/wallet/balance")
@@ -112,7 +120,7 @@ export default function Cart() {
           </label>
           <input
             type="time"
-            required
+            defaultValue={defaultPickupTime}
             ref={pickupTimeRef}
             className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
             style={{ borderColor: "var(--hairline)", "--tw-ring-color": "var(--role-student)" }}
