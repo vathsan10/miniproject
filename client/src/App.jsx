@@ -4,7 +4,9 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import { HOME_BY_ROLE } from "./lib/roles";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import StudentHome from "./pages/student/StudentHome";
+import StudentLayout from "./pages/student/StudentLayout";
+import Dashboard from "./pages/student/Dashboard";
+import Transactions from "./pages/student/Transactions";
 import VendorHome from "./pages/vendor/VendorHome";
 import AdminHome from "./pages/admin/AdminHome";
 
@@ -26,10 +28,13 @@ export default function App() {
             path="/student"
             element={
               <ProtectedRoute allowedRoles={["STUDENT"]}>
-                <StudentHome />
+                <StudentLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="transactions" element={<Transactions />} />
+          </Route>
           <Route
             path="/vendor"
             element={

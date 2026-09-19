@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { createServer } from "node:http";
 import { initSocket } from "./lib/socket.js";
 import authRoutes from "./routes/auth.routes.js";
+import walletRoutes from "./routes/wallet.routes.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -23,11 +24,15 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/wallet", walletRoutes);
 // Further route modules are mounted here as each phase adds them.
 
 // Centralized error handler: any thrown/rejected error from an
 // asyncHandler-wrapped route lands here instead of crashing the process.
 app.use((err, req, res, next) => {
+  if (err.status) {
+    return res.status(err.status).json({ error: err.message });
+  }
   console.error(err);
   res.status(500).json({ error: "Internal server error" });
 });

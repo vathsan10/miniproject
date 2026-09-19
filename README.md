@@ -12,7 +12,7 @@ Build is happening in phases; this README is updated as each phase lands.
 
 - [x] Phase 1 — Project setup, Prisma schema, migrations, seed script
 - [x] Phase 2 — Auth
-- [ ] Phase 3 — Wallet
+- [x] Phase 3 — Wallet
 - [ ] Phase 4 — Menu management + browsing
 - [ ] Phase 5 — Cart, checkout, order transaction logic
 - [ ] Phase 6 — Vendor order dashboard + Socket.io
