@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../api/client";
 import { formatCredits } from "../../lib/format";
@@ -14,7 +14,11 @@ export default function Cart() {
   const { vendorId, vendorName, items, updateQuantity, clearCart, totalPrice } = useCart();
   const navigate = useNavigate();
   const [balance, setBalance] = useState(null);
-  const [pickupTime, setPickupTime] = useState("");
+  // Uncontrolled on purpose: Safari's native time-picker widget fights
+  // with React re-applying `value` on every keystroke and spuriously
+  // shows "Invalid value", so we read the value directly at submit time
+  // instead of mirroring it into state on every change.
+  const pickupTimeRef = useRef(null);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -42,6 +46,7 @@ export default function Cart() {
   async function handleCheckout(e) {
     e.preventDefault();
     setError("");
+    const pickupTime = pickupTimeRef.current?.value;
     if (!pickupTime) {
       setError("Choose a pickup time");
       return;
@@ -108,8 +113,7 @@ export default function Cart() {
           <input
             type="time"
             required
-            value={pickupTime}
-            onChange={(e) => setPickupTime(e.target.value)}
+            ref={pickupTimeRef}
             className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
             style={{ borderColor: "var(--hairline)", "--tw-ring-color": "var(--role-student)" }}
           />
