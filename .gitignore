@@ -5,8 +5,8 @@ build/
 !.env.example
 *.log
 .DS_Store
-server/prisma/dev.db
-server/prisma/dev.db-journal
-server/src/prisma/dev.db
-server/src/prisma/dev.db-journal
+server/prisma/*.db
+server/prisma/*.db-journal
+server/src/prisma/*.db
+server/src/prisma/*.db-journal
 .vite/

@@ -18,7 +18,7 @@ Build is happening in phases; this README is updated as each phase lands.
 - [x] Phase 6 — Vendor order dashboard + Socket.io
 - [x] Phase 7 — QR pickup
 - [x] Phase 8 — Sales summary, admin page, UI polish
-- [ ] Phase 9 — Tests + final docs
+- [x] Phase 9 — Tests + final docs
 
 ## Setup
 
@@ -57,6 +57,38 @@ Password for every seeded account: `password123`
 | Student | student2@unipay.test   | 200 starting credits |
 | Student | student3@unipay.test   | 200 starting credits |
 
+Vendors cannot self-register — `admin@unipay.test` is the only account
+that can create one, from the admin console at `/admin`.
+
+## Testing
+
+```bash
+cd server
+npm test
+```
+
+This spins up a real instance of the server against a disposable SQLite
+database (`server/src/prisma/test.db`, migrated fresh each run, never
+touching `dev.db`), then runs an integration suite against it over HTTP.
+Each test creates its own isolated student/vendor/menu-item fixtures, so
+tests never interfere with each other. Covers the five scenarios called
+out as critical:
+
+- **Insufficient balance** — checkout is rejected, and rolls back
+  completely (no stock decrement survives, no order or transaction row
+  is left behind) even though the balance check happens after the
+  per-item stock decrement inside the same DB transaction.
+- **Overselling race** — two students checking out the last unit of
+  stock at the same time: exactly one succeeds, stock lands at exactly
+  0, never negative.
+- **Double QR scan** — collecting an order twice (by token or by backup
+  code, sequentially or concurrently) always returns "Already
+  collected" on every attempt after the first.
+- **Refund on reject** — a vendor rejecting an order refunds the exact
+  amount and restores exactly the stock that was reserved.
+- **Idempotent top-up** — verifying the same Razorpay/mock payment
+  twice (sequentially or concurrently) credits the wallet exactly once.
+
 ## Architecture
 
 - **Database**: Prisma ORM, SQLite for local dev. Moving to Postgres later
@@ -83,17 +115,28 @@ Password for every seeded account: `password123`
 /server
   src/
     prisma/        schema.prisma, migrations, seed.js
-    middleware/     requireAuth, requireRole, zod validation
-    lib/            prisma client, jwt helpers, socket.io, razorpay/mock
-    routes/         Express routers
+    middleware/     requireAuth, requireRole, attachVendor, zod validation
+    lib/            prisma client, jwt, socket.io (auth'd rooms), razorpay/mock,
+                    httpError, constants (status transitions), backup codes
+    routes/         Express routers (auth, wallet, menu, vendor, orders, admin)
     controllers/    request handlers
-    services/       business logic (wallet ledger, order transactions, payments)
+    services/       business logic - wallet ledger, order transactions
+                    (checkout/cancel/reject/pickup), sales summary
     schemas/        zod request schemas
+  tests/            integration tests (node:test) against a live server
+                    instance + a disposable test database
+  scripts/          run-tests.mjs - test DB/server orchestration
 /client
   src/
     api/            fetch wrapper
-    context/        auth context
-    pages/          student/, vendor/, admin/
-    components/     shared UI
-    hooks/          socket hook
+    context/        auth, cart, and toast contexts
+    routes/         ProtectedRoute (role-based redirect)
+    hooks/          useSocketEvent
+    lib/            socket client, notification sound, Razorpay checkout
+                    loader, format helpers, role/home-route map
+    pages/
+      student/      dashboard, menu, cart, orders, pickup QR, transactions
+      vendor/       order dashboard, menu manager, QR/backup-code scanner,
+                    sales summary
+      admin/        vendor creation, user/vendor listings
 ```
