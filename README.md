@@ -17,7 +17,7 @@ Build is happening in phases; this README is updated as each phase lands.
 - [x] Phase 5 — Cart, checkout, order transaction logic
 - [x] Phase 6 — Vendor order dashboard + Socket.io
 - [x] Phase 7 — QR pickup
-- [ ] Phase 8 — Sales summary, admin page, UI polish
+- [x] Phase 8 — Sales summary, admin page, UI polish
 - [ ] Phase 9 — Tests + final docs
 
 ## Setup

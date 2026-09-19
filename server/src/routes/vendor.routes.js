@@ -13,6 +13,7 @@ import {
   toggleShop,
 } from "../controllers/vendorMenu.controller.js";
 import { listOrders, updateStatus, verify } from "../controllers/vendorOrder.controller.js";
+import { summary } from "../controllers/vendorSales.controller.js";
 
 const router = Router();
 
@@ -27,5 +28,7 @@ router.patch("/shop", validate(toggleShopSchema), asyncHandler(toggleShop));
 router.get("/orders", asyncHandler(listOrders));
 router.patch("/orders/:id/status", validate(updateOrderStatusSchema), asyncHandler(updateStatus));
 router.post("/orders/verify", validate(verifyPickupSchema), asyncHandler(verify));
+
+router.get("/sales/summary", asyncHandler(summary));
 
 export default router;

@@ -16,11 +16,12 @@ import StudentOrders from "./pages/student/Orders";
 import VendorLayout from "./pages/vendor/VendorLayout";
 import MenuManager from "./pages/vendor/MenuManager";
 import VendorOrders from "./pages/vendor/Orders";
+import Sales from "./pages/vendor/Sales";
+import AdminHome from "./pages/admin/AdminHome";
 
 // html5-qrcode is a large dependency - only load it when a vendor
 // actually opens the scanner, not in everyone's initial bundle.
 const Scan = lazy(() => import("./pages/vendor/Scan"));
-import AdminHome from "./pages/admin/AdminHome";
 
 function RootRedirect() {
   const { user, loading } = useAuth();
@@ -70,6 +71,7 @@ export default function App() {
                     </Suspense>
                   }
                 />
+                <Route path="sales" element={<Sales />} />
               </Route>
               <Route
                 path="/admin"
